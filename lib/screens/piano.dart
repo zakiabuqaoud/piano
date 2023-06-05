@@ -1,6 +1,10 @@
 
 //Flutter Import
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_midi/flutter_midi.dart';
 
 //External Library
 import 'package:piano/piano.dart';
@@ -13,8 +17,21 @@ class Piano extends StatefulWidget {
   @override
   State<Piano> createState() => _PianoState();
 }
-
 class _PianoState extends State<Piano> {
+  final _flutterMidi = FlutterMidi();
+  @override
+  void initState() {
+    load('assets/sound_font/Yamaha-Grand-Lite-SF-v1.1.sf2');
+    super.initState();
+  }
+
+  void load(String asset) async {
+    _flutterMidi.unmute(); // Optionally Unmute
+    ByteData _byte = await rootBundle.load(asset);
+    _flutterMidi.prepare(sf2: _byte);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return  InteractivePiano(
@@ -26,8 +43,7 @@ class _PianoState extends State<Piano> {
         Clef.Treble,
       ]),
       onNotePositionTapped: (position) {
-        // Use an audio library like flutter_midi to play the sound
-
+        _flutterMidi.playMidiNote(midi: position.pitch);
       },
     );
   }
